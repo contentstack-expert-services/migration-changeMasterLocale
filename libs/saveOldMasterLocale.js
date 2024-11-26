@@ -9,11 +9,12 @@ module.exports = function saveOldMasterLocale(
   oldMasterLocaleName,
   folderPath
 ) {
-  localeData['oldMasterlocale'] = {
+  let uid = `oldMasterlocale_${oldMasterLocale.replace(/-/g, '_')}`;
+  localeData[uid] = {
     code: oldMasterLocale,
     fallback_locale: newMasterLocale,
     name: oldMasterLocaleName,
-    uid: 'oldMasterlocale',
+    uid: uid,
   };
 
   helper.writeFile(

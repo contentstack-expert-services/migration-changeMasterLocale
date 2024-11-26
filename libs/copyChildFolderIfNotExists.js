@@ -8,7 +8,8 @@ const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
 const createPublishLocale = require('./createPublishLocale');
-const replaceEnvironmentLocale = require('./replaceEnvironmentLocale');
+const changeEnvironmentLocale = require('./changeEnvironmentLocale');
+const changeWorkflowLocale = require('./changeWorkflowLocale');
 
 // to replace all the old master locale present inside the entries.json
 module.exports = async function copyChildFolderIfNotExists(
@@ -47,14 +48,15 @@ module.exports = async function copyChildFolderIfNotExists(
                 recursive: true,
               });
 
-              // Introduce a 5-second delay before calling createPublishLocale()
+              // Introduce a 5-second delay before calling required functions
               setTimeout(() => {
-                // to replace oldMasterLocale from the publish details in destinationFolderPath of entries folder
-                createPublishLocale(
-                  path.join(folderPath, 'assets'),
-                  newMasterLocale,
-                  oldMasterLocale
-                );
+                if (fs.existsSync(path.join(folderPath, 'assets')))
+                  // to replace oldMasterLocale from the publish details in destinationFolderPath of entries folder
+                  createPublishLocale(
+                    path.join(folderPath, 'assets'),
+                    newMasterLocale,
+                    oldMasterLocale
+                  );
 
                 // to replace oldMasterLocale from the publish details in assets folder
                 createPublishLocale(
@@ -63,11 +65,29 @@ module.exports = async function copyChildFolderIfNotExists(
                   oldMasterLocale
                 );
 
-                replaceEnvironmentLocale(
-                  path.join(folderPath, 'environments', 'environments.json'),
-                  newMasterLocale,
-                  oldMasterLocale
-                );
+                if (
+                  fs.existsSync(
+                    path.join(folderPath, 'environments', 'environments.json')
+                  )
+                )
+                  // to replace oldMasterLocale from the environments json
+                  changeEnvironmentLocale(
+                    path.join(folderPath, 'environments', 'environments.json'),
+                    newMasterLocale,
+                    oldMasterLocale
+                  );
+
+                if (
+                  fs.existsSync(
+                    path.join(folderPath, 'workflows', 'workflows.json')
+                  )
+                )
+                  // to replace oldMasterLocale from the environments json
+                  changeWorkflowLocale(
+                    path.join(folderPath, 'workflows', 'workflows.json'),
+                    newMasterLocale,
+                    oldMasterLocale
+                  );
 
                 console.log(
                   'Created new master-locale "',
@@ -77,8 +97,6 @@ module.exports = async function copyChildFolderIfNotExists(
                   '" content-type'
                 );
               }, 5000); // 5000 milliseconds = 5 seconds
-            } else {
-              console.log('hey else');
             }
           }
         }

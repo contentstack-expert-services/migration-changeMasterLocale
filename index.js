@@ -3,7 +3,7 @@ const chalk = require('chalk');
 const axios = require('axios');
 const fs = require('fs');
 
-const executeReplaceLocale = require('./libs/executeReplaceLocale');
+const executeReplaceLocale = require('./libs/changeLocale');
 
 const migFunction = async (folderPath) => {
   const localErrorMessage =

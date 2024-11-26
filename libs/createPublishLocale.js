@@ -4,6 +4,7 @@ const { promisify } = require('util');
 const readdir = promisify(fs.readdir);
 
 const helper = require('../utils/helper');
+const changeVariantLocale = require('./changeVariantLocale');
 
 module.exports = async function createPublishLocale(
   folderPath,
@@ -14,12 +15,23 @@ module.exports = async function createPublishLocale(
     // Read the contents of the Entry and Assets folder
     const entriesFiles = await readdir(folderPath);
 
+    // this function is only written to change old masterlocale of variant to new masterlocale
+    if (fs.existsSync(path.join(folderPath, 'variants'))) {
+      await changeVariantLocale(
+        path.join(folderPath, 'variants'),
+        newMasterLocale,
+        oldMasterLocale
+      );
+    }
+
     // filter files array which we don't need
     const filterEntriesFiles = [
       'index.json',
       'folders.json',
       'assets.json',
       'files',
+      'metadata.json',
+      'variants',
     ];
 
     // to get the filter data from the Entry and Assets folder
@@ -31,33 +43,48 @@ module.exports = async function createPublishLocale(
       const entryData = helper.readFile(path.join(folderPath, entryFile));
 
       for (const key in entryData) {
-        // check if the publish_details is present or not
+        // Update the top-level `locale` field
+        if (entryData[key]?.locale === oldMasterLocale) {
+          entryData[key].locale = newMasterLocale;
+        }
+
+        // Check if `publish_details` exists and has entries
         if (
           entryData[key]?.publish_details &&
           entryData[key]?.publish_details.length > 0
         ) {
-          entryData[key]?.publish_details.forEach((detail, index) => {
-            // check if the locale is old master locale and not the new master locale
-            if (
-              detail.locale === oldMasterLocale &&
-              detail.locale !== newMasterLocale
-            ) {
+          // Create a map of unique combinations for deduplication
+          const uniqueDetails = {};
+          entryData[key].publish_details.forEach((detail) => {
+            const uniqueKey = `${detail.environment}-${detail.locale}`;
+            if (!uniqueDetails[uniqueKey]) {
+              uniqueDetails[uniqueKey] = detail;
+            }
+          });
+
+          // Replace `publish_details` with unique values
+          const uniqueDetailsArray = Object.values(uniqueDetails);
+
+          // Ensure a new locale is created for each unique environment
+          uniqueDetailsArray.forEach((detail) => {
+            if (detail.locale === oldMasterLocale) {
               const newMasterLocaleJSON = {
                 ...detail,
                 locale: newMasterLocale,
               };
-              entryData[key]?.publish_details.splice(
-                index + 1,
-                0,
-                newMasterLocaleJSON
-              );
+              const newKey = `${newMasterLocaleJSON.environment}-${newMasterLocaleJSON.locale}`;
+              if (!uniqueDetails[newKey]) {
+                uniqueDetails[newKey] = newMasterLocaleJSON;
+              }
             }
           });
-        } else {
+
+          // Assign back the updated unique `publish_details`
+          entryData[key].publish_details = Object.values(uniqueDetails);
         }
       }
 
-      // saving the new masterlocale publish detail inside the entries and assets original json file
+      // Save the updated data back to the file
       helper.writeFile(
         path.join(folderPath, entryFile),
         JSON.stringify(entryData, null, 4)
