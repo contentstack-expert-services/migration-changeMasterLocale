@@ -1,18 +1,20 @@
 {
-  "name": "danfoss",
+  "name": "change-master-locale",
   "version": "1.0.0",
   "description": "",
-  "main": "changeLocale.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@contentstack/cli-utilities": "^1.6.2",
+    "axios": "^1.7.7",
     "chalk": "^4.1.0",
     "crypto": "^1.0.1",
+    "inquirer": "^8.2.4",
     "mkdirp": "^3.0.1"
   }
 }

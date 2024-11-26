@@ -1,5 +1,4 @@
-_backup_*
-csMigrationData*
+
 logs*
 node_modules*
 package-lock.json
