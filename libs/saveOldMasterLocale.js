@@ -9,13 +9,25 @@ module.exports = function saveOldMasterLocale(
   oldMasterLocaleName,
   folderPath
 ) {
-  let uid = `oldMasterlocale_${oldMasterLocale.replace(/-/g, '_')}`;
-  localeData[uid] = {
-    code: oldMasterLocale,
-    fallback_locale: newMasterLocale,
-    name: oldMasterLocaleName,
-    uid: uid,
-  };
+  const localeData = helper.readFile(
+    path.join(folderPath, 'locales', 'locales.json')
+  );
+
+  for (const key of Object.values(localeData)) {
+    if (key.code === newMasterLocale) {
+      key.code = oldMasterLocale;
+      key.name = oldMasterLocaleName;
+      key.fallback_locale = newMasterLocale;
+    } else {
+      let uid = `oldMasterlocale_${oldMasterLocale.replace(/-/g, '_')}`;
+      localeData[uid] = {
+        code: oldMasterLocale,
+        fallback_locale: newMasterLocale,
+        name: oldMasterLocaleName,
+        uid: uid,
+      };
+    }
+  }
 
   helper.writeFile(
     path.join(folderPath, 'locales', 'locales.json'),
