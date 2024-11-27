@@ -9,10 +9,6 @@ module.exports = function saveOldMasterLocale(
   oldMasterLocaleName,
   folderPath
 ) {
-  const localeData = helper.readFile(
-    path.join(folderPath, 'locales', 'locales.json')
-  );
-
   for (const key of Object.values(localeData)) {
     if (key.code === newMasterLocale) {
       key.code = oldMasterLocale;
