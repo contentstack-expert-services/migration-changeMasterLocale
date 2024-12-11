@@ -8,6 +8,7 @@ module.exports = function createMasterLocale(
   newMasterLocaleName,
   folderPath
 ) {
+try {
   for (let key in masterLocale) {
     if (masterLocale.hasOwnProperty(key)) {
       // Modify 'code' and 'name' fields
@@ -20,4 +21,7 @@ module.exports = function createMasterLocale(
     path.join(folderPath, 'locales', 'master-locale.json'),
     JSON.stringify(masterLocale, null, 4)
   );
+} catch (error) {
+  console.error(error);
+}
 };

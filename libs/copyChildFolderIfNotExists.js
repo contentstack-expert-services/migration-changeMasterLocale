@@ -32,6 +32,7 @@ module.exports = async function copyChildFolderIfNotExists(
         const sourceFolderPath = path.join(subFolderPath, oldMasterLocale);
         // Check if the folder to copy exists
         const destinationFolderPath = path.join(subFolderPath, newMasterLocale);
+        
 
         try {
           // Check if the folder to copy exists

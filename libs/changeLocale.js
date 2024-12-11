@@ -49,6 +49,8 @@ module.exports = replaceLocale = (
     let oldMasterLocale = helper.readFile(
       path.join(folderPath, 'locales', 'master-locale.json')
     );
+    const oldMasterLocaleCode = Object.values(oldMasterLocale)[0]?.code;
+    const oldMasterLocaleName = Object.values(oldMasterLocale)[0]?.name;
     try {
       const localeData = helper.readFile(
         path.join(folderPath, 'locales', 'locales.json')
@@ -58,14 +60,17 @@ module.exports = replaceLocale = (
 
       // to check if locales.json file is empty or not
       if (Object.keys(localeData).length === 0) {
+        
         // to check if the newMasterLocale and oldMasterLocale is same or not
         if (String(newMasterLocale) === String(oldMasterCode)) {
+          
           console.log(
             '"',
             chalk.red(`${newMasterLocale}`),
             '" is already the master locale'
           );
         } else {
+          
           repeatedFunction(
             localeData,
             newMasterLocale,
@@ -85,9 +90,13 @@ module.exports = replaceLocale = (
           );
         }
       } else {
+
+        
         for (const localeCode of Object.values(localeData)) {
           // to check if new master locale is in the locales.json or not
           if (localeCode.code === newMasterLocale) {
+
+            
             createMasterLocale(
               oldMasterLocale,
               newMasterLocale,
@@ -95,19 +104,21 @@ module.exports = replaceLocale = (
               folderPath
             );
 
+            
             // to change fallback of oldmasterlocale to newmasterlocale
             changeFallbackLocale(
               localeData,
-              Object.values(oldMasterLocale)[0]?.code,
+              oldMasterLocaleCode,
               newMasterLocale,
               folderPath
             );
 
+            
             for (let oldLocaleCode in localeData) {
               if (localeData.hasOwnProperty(oldLocaleCode)) {
                 if (localeData[oldLocaleCode].code === newMasterLocale) {
-                  localeData[oldLocaleCode].code = newMasterLocale;
-                  localeData[oldLocaleCode].name = newMasterLocaleName;
+                  localeData[oldLocaleCode].code = oldMasterLocaleCode;
+                  localeData[oldLocaleCode].name = oldMasterLocaleName;
                 }
               }
             }
@@ -116,7 +127,10 @@ module.exports = replaceLocale = (
               path.join(folderPath, 'locales', 'locales.json'),
               JSON.stringify(localeData, null, 4)
             );
+            // to create new master locale inside the entries folder if not present
+  await copyChildFolderIfNotExists(folderPath, newMasterLocale, oldMasterCode);
           } else {
+            
             repeatedFunction(
               localeData,
               newMasterLocale,
